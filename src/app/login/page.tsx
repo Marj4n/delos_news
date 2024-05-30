@@ -1,12 +1,12 @@
 "use client";
 
-import { Center, Spinner } from "@chakra-ui/react";
+import { Center } from "@chakra-ui/react";
 import Form from "./form";
-import { getSession } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { useUser } from "@/context/userContext";
 
 export default function Login() {
-  const isLogged = getSession();
+  const { user: isLogged } = useUser();
   if (isLogged) {
     redirect("/");
   }
