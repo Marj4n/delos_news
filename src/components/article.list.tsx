@@ -11,13 +11,13 @@ interface ArticleListProps {
   paginate: (pageNumber: number) => void;
 }
 
-export default function ({
+const ArticleList = ({
   articles,
   currentPage,
   itemsPerPage,
   totalItems,
   paginate,
-}: ArticleListProps) {
+}: ArticleListProps) => {
   return (
     <Center minH="80vh" flexDirection="column" gap={2} p={4}>
       <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6}>
@@ -33,4 +33,6 @@ export default function ({
       />
     </Center>
   );
-}
+};
+
+export default ArticleList;

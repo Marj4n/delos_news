@@ -9,15 +9,15 @@ import {
   AlertIcon,
   Heading,
 } from "@chakra-ui/react";
-import { useArticle } from "@/lib/api";
 import { useUser } from "@/context/userContext";
 import { OptionType } from "@/types/option";
 import { redirect } from "next/navigation";
 import { ApiResponseType } from "@/types/api";
 import ArticleSearch from "@/components/article.search";
 import ArticleList from "@/components/article.list";
+import { fetchArticle } from "@/lib/api";
 
-const HomePage: React.FC = () => {
+export default function Home() {
   const [articles, setArticles] = useState<ApiResponseType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +31,9 @@ const HomePage: React.FC = () => {
     if (!isLogged) {
       return redirect("/login");
     }
-    const fetchArticles = async () => {
+    const fetch = async () => {
       try {
-        const data = await useArticle(filterType);
+        const data = await fetchArticle(filterType);
         setArticles(data);
       } catch (error: any) {
         setError(error);
@@ -41,7 +41,7 @@ const HomePage: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchArticles();
+    fetch();
   }, [filterType, isLogged]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +104,4 @@ const HomePage: React.FC = () => {
       />
     </Center>
   );
-};
-
-export default HomePage;
+}

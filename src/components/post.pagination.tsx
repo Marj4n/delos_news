@@ -1,5 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Button, HStack, Icon } from "@chakra-ui/react";
+import React from "react";
 
 interface PaginationProps {
   itemsPerPage: number;
@@ -8,12 +9,12 @@ interface PaginationProps {
   currentPage: number;
 }
 
-export default function ({
+const PostPagination = ({
   itemsPerPage,
   totalItems,
   paginate,
   currentPage,
-}: PaginationProps) {
+}: PaginationProps) => {
   const pageNumbers = [];
 
   for (let i = 1; i <= Math.ceil(totalItems / itemsPerPage); i++) {
@@ -59,4 +60,6 @@ export default function ({
       </Button>
     </HStack>
   );
-}
+};
+
+export default PostPagination;

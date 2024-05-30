@@ -4,7 +4,7 @@ import { ApiResponseType } from "@/types/api";
 
 const apiKey = process.env.NEXT_PUBLIC_API_KEY as string;
 
-export const useArticle = async (
+export const fetchArticle = async (
   option: OptionType
 ): Promise<ApiResponseType[]> => {
   try {

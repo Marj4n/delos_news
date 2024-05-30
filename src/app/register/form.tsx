@@ -22,7 +22,7 @@ import { registerAccount } from "@/lib/utils";
 import { AccountType } from "@/types/account";
 import { redirect } from "next/navigation";
 
-export default function () {
+function RegisterForm() {
   const {
     handleSubmit,
     register,
@@ -149,3 +149,7 @@ export default function () {
     </Stack>
   );
 }
+
+RegisterForm.displayName = "RegisterForm";
+
+export default RegisterForm;

@@ -8,12 +8,12 @@ interface ArticleSearchProps {
   handleFilterChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export default function ({
+const ArticleSearch = ({
   searchTerm,
   filterType,
   handleSearchChange,
   handleFilterChange,
-}: ArticleSearchProps) {
+}: ArticleSearchProps) => {
   return (
     <Flex mb={4} gap={4} w="100%" maxW="800px" flexDirection="row">
       <Input
@@ -29,4 +29,6 @@ export default function ({
       </Select>
     </Flex>
   );
-}
+};
+
+export default ArticleSearch;
