@@ -1,5 +1,3 @@
-"use client";
-
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -20,9 +18,9 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { redirect } from "next/navigation";
-import { checkExistingAccounts, saveAccount } from "@/lib/utils";
+import { registerAccount } from "@/lib/utils";
 import { AccountType } from "@/types/account";
+import { redirect } from "next/navigation";
 
 export default function () {
   const {
@@ -30,23 +28,22 @@ export default function () {
     register,
     setError,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<AccountType>();
   const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
 
   const onSubmit = async (values: AccountType) => {
-    const existingAccountError = checkExistingAccounts(values);
+    const { error } = await registerAccount(values);
 
-    if (existingAccountError) {
-      setError(existingAccountError.error, {
-        type: "validate",
-        message: existingAccountError.message,
-      });
+    if (error) {
+      if (error.includes("Username")) {
+        setError("username", { type: "validate", message: error });
+      } else if (error.includes("Email")) {
+        setError("email", { type: "validate", message: error });
+      }
       return;
     }
 
-    saveAccount(values);
     toast({
       title: "Account created.",
       description: "We've created your account for you.",
@@ -55,7 +52,6 @@ export default function () {
       isClosable: true,
       position: "bottom-right",
       onCloseComplete: () => {
-        reset();
         redirect("/login");
       },
     });

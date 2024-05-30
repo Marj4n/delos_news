@@ -1,5 +1,3 @@
-"use client";
-
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -20,8 +18,10 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { compare, getStorage, setSession } from "@/lib/utils";
+import { loginAccount } from "@/lib/utils";
 import { AccountType } from "@/types/account";
+import { redirect } from "next/navigation";
+import { useUser } from "@/context/userContext";
 
 export default function () {
   const {
@@ -31,31 +31,23 @@ export default function () {
     formState: { errors, isSubmitting },
   } = useForm<AccountType>();
   const [showPassword, setShowPassword] = useState(false);
+  const { setUser } = useUser();
   const toast = useToast();
 
   const onSubmit = async (values: AccountType) => {
-    const existingAccounts = getStorage<AccountType[]>("accounts") || [];
-    const account = existingAccounts.find((acc) => acc.email === values.email);
+    const { error, account } = await loginAccount(
+      values.email,
+      values.password
+    );
 
-    if (!account) {
-      setError("email", {
-        type: "validate",
-        message: "Email address not found. Please register first.",
-      });
+    if (error) {
+      if (error.includes("Email")) {
+        setError("email", { type: "validate", message: error });
+      } else if (error.includes("password")) {
+        setError("password", { type: "validate", message: error });
+      }
       return;
-    }
-
-    const isPasswordCorrect = await compare(values.password, account.password);
-    if (!isPasswordCorrect) {
-      setError("password", {
-        type: "validate",
-        message: "Incorrect password.",
-      });
-      return;
-    }
-
-    // Set session with user account
-    setSession(account);
+    } else setUser(account!!);
 
     toast({
       title: "Login successful.",
@@ -65,7 +57,7 @@ export default function () {
       isClosable: true,
       position: "bottom-right",
       onCloseComplete: () => {
-        window.location.reload();
+        redirect("/");
       },
     });
 
@@ -95,7 +87,6 @@ export default function () {
             <FormControl isInvalid={!!errors.email}>
               <FormLabel>Email address</FormLabel>
               <Input
-                type="email"
                 placeholder="Enter your email address"
                 {...register("email", {
                   required: "This is required",

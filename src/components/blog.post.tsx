@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import {
   Box,
@@ -8,33 +6,39 @@ import {
   Text,
   Stack,
   useColorModeValue,
+  Button,
 } from "@chakra-ui/react";
 import { ApiResponseType } from "@/types/api";
-import moment from "moment";
+import { useArticle } from "@/context/articleContext";
+import { getImageUrl, getPrice, truncateText } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-const truncateText = (text: string, maxLength: number): string => {
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + "...";
-  }
-  return text;
-};
-
-export default function ({ data }: { data: ApiResponseType }) {
-  const now = moment().format("YYYY-MM-DD");
-  const diff = moment(now).diff(moment(data.published_date), "days");
-  const prices = diff <= 1 ? 50000 : diff <= 7 ? 20000 : 0;
-
-  const imageUrl =
-    data.media?.[0]?.["media-metadata"]?.[2]?.url ||
-    data.media?.[0]?.["media-metadata"]?.[1]?.url ||
-    data.media?.[0]?.["media-metadata"]?.[0]?.url ||
-    "";
-
+export default function ({
+  data,
+  owned,
+}: {
+  data: ApiResponseType;
+  owned?: boolean;
+}) {
+  const router = useRouter();
+  const prices = getPrice(data);
+  const { setArticle } = useArticle();
+  const imageUrl = getImageUrl(data);
   const truncatedAbstract = truncateText(data.abstract, 150);
+
+  const handleClick = () => {
+    setArticle(data);
+    router.push("/detail");
+  };
+
+  const handleVisitClick = () => {
+    window.open(data.url, "_blank");
+  };
 
   return (
     <Center py={6}>
       <Box
+        onClick={owned ? undefined : handleClick}
         cursor="pointer"
         maxW={{ base: "full", md: "445px" }}
         w={"full"}
@@ -46,7 +50,7 @@ export default function ({ data }: { data: ApiResponseType }) {
         transition="all 0.3s ease-in-out"
         _hover={{
           boxShadow: "lg",
-          transform: "scale(1.03)",
+          transform: owned ? "none" : "scale(1.03)",
           borderColor: "blue.500",
           borderWidth: "1.5px",
         }}
@@ -88,10 +92,21 @@ export default function ({ data }: { data: ApiResponseType }) {
             <Text color={"gray.500"}>{truncatedAbstract}</Text>
           </Stack>
           <Stack mt={6} direction={"row"} spacing={4} align={"center"}>
-            <Text fontWeight={600}>
-              {data.published_date} ·{" "}
-              {prices > 0 ? `$${prices.toLocaleString("id-ID")}` : "Free"}
-            </Text>
+            {!owned && (
+              <Text fontWeight={600}>
+                {data.published_date} ·{" "}
+                {prices > 0 ? `$${prices.toLocaleString("id-ID")}` : "Free"}
+              </Text>
+            )}
+            {owned && (
+              <Button
+                colorScheme="blue"
+                variant="solid"
+                onClick={handleVisitClick}
+              >
+                Visit Link
+              </Button>
+            )}
           </Stack>
         </Stack>
       </Box>
