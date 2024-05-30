@@ -1,5 +1,7 @@
 "use client";
 
+import { ArticleProvider } from "@/context/articleContext";
+import { UserProvider } from "@/context/userContext";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
 
@@ -19,5 +21,11 @@ const theme = extendTheme({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <ChakraProvider theme={theme}>{children}</ChakraProvider>;
+  return (
+    <ChakraProvider theme={theme}>
+      <UserProvider>
+        <ArticleProvider>{children}</ArticleProvider>
+      </UserProvider>
+    </ChakraProvider>
+  );
 }

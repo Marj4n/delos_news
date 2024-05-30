@@ -19,11 +19,13 @@ import {
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { getSession, removeSession } from "@/lib/utils";
+import { removeSelectedArticle, removeSession } from "@/lib/utils";
+import { useUser } from "@/context/userContext";
 
 export default function () {
   const { colorMode, toggleColorMode } = useColorMode();
-  const session = getSession();
+  const { user, setUser } = useUser();
+
   return (
     <Box
       bg={useColorModeValue("gray.200", "gray.900")}
@@ -55,8 +57,7 @@ export default function () {
               )}
             </Button>
 
-            {!session ? (
-              // login button
+            {!user ? (
               <Button colorScheme={"blue"} variant={"solid"}>
                 <Link href="/login">Login</Link>
               </Button>
@@ -88,15 +89,20 @@ export default function () {
                   </Center>
                   <br />
                   <Flex flexDir="column" align="center">
-                    <p>{session.username}</p>
-                    <Heading size="sm">{session.email}</Heading>
+                    <p>{user.username}</p>
+                    <Heading size="sm">{user.email}</Heading>
+                    <p>Balance: ${user.balance.toLocaleString("id-ID")}</p>
                   </Flex>
                   <br />
                   <MenuDivider />
-                  <MenuItem>Collection</MenuItem>
+                  <MenuItem as={Link} href="/collection">
+                    Collection
+                  </MenuItem>
                   <MenuItem
                     onClick={() => {
                       removeSession();
+                      setUser(null);
+                      removeSelectedArticle();
                       window.location.reload();
                     }}
                     as={"button"}

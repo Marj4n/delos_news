@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import BlogPost from "@/components/blog.post";
-import { getSession } from "@/lib/utils";
 import {
   Center,
   SimpleGrid,
@@ -10,11 +9,13 @@ import {
   Spinner,
   Alert,
   AlertIcon,
+  Flex,
 } from "@chakra-ui/react";
 import { redirect } from "next/navigation";
 import { ApiResponseType } from "@/types/api";
 import { useArticle } from "@/lib/api";
 import PostPagination from "@/components/post.pagination";
+import { useUser } from "@/context/userContext";
 
 export default function Home() {
   const [articles, setArticles] = useState<ApiResponseType[]>([]);
@@ -22,8 +23,12 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const isLogged = useUser().user;
 
   useEffect(() => {
+    if (!isLogged) {
+      return redirect("/login");
+    }
     const fetchArticles = async () => {
       try {
         const data = await useArticle("emailed");
@@ -37,11 +42,6 @@ export default function Home() {
     fetchArticles();
   }, []);
 
-  const session = getSession();
-  if (!session) {
-    return redirect("/login");
-  }
-
   if (loading) {
     return (
       <Center minH="80vh">
@@ -52,16 +52,15 @@ export default function Home() {
 
   if (error) {
     return (
-      <Center minH="80vh">
+      <Flex minH="80vh" p={6} flexDir={"column"}>
         <Alert status="error">
           <AlertIcon />
           There was an error fetching the articles.
         </Alert>
-      </Center>
+      </Flex>
     );
   }
 
-  // Calculate the indexes for pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = articles.slice(indexOfFirstItem, indexOfLastItem);
