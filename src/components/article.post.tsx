@@ -14,13 +14,13 @@ import { getImageUrl, getPrice, truncateText } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/userContext";
 
-export default function ({
+const ArticlePost = ({
   data,
   owned,
 }: {
   data: ApiResponseType;
   owned?: boolean;
-}) {
+}) => {
   const router = useRouter();
   let prices = getPrice(data);
   const free = useUser().user?.freeArticles ?? [];
@@ -118,4 +118,6 @@ export default function ({
       </Box>
     </Center>
   );
-}
+};
+
+export default ArticlePost;

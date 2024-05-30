@@ -23,7 +23,7 @@ import { AccountType } from "@/types/account";
 import { redirect } from "next/navigation";
 import { useUser } from "@/context/userContext";
 
-export default function () {
+function LoginForm() {
   const {
     handleSubmit,
     register,
@@ -69,7 +69,7 @@ export default function () {
       <Stack align="center">
         <Heading fontSize="4xl">Login to your account</Heading>
         <Text fontSize="lg" color="gray.600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <LinkBox as="span" color="blue.400">
             <Link href="/register">Register here</Link>
           </LinkBox>
@@ -143,3 +143,7 @@ export default function () {
     </Stack>
   );
 }
+
+LoginForm.displayName = "LoginForm";
+
+export default LoginForm;

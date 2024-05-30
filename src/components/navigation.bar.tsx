@@ -23,7 +23,7 @@ import Link from "next/link";
 import { removeSelectedArticle, removeSession } from "@/lib/utils";
 import { useUser } from "@/context/userContext";
 
-export default function () {
+const NavigationBar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const { user, setUser } = useUser();
 
@@ -96,7 +96,9 @@ export default function () {
                       Balance: ${user.balance.toLocaleString("id-ID")}
                     </Text>
                     {user.freeArticles > 0 && (
-                      <Text color="blue.300">Free Articles: {user.freeArticles}</Text>
+                      <Text color="blue.300">
+                        Free Articles: {user.freeArticles}
+                      </Text>
                     )}
                   </Flex>
                   <br />
@@ -133,4 +135,6 @@ export default function () {
       </Flex>
     </Box>
   );
-}
+};
+
+export default NavigationBar;
