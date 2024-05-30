@@ -23,7 +23,7 @@
    NEXT_PUBLIC_API_KEY="Enter your nytimes.com API key here"
    ```
 
-   You can get your API key from [nytimes.com](https://developer.nytimes.com/)
+   you can get your API key from [nytimes.com](https://developer.nytimes.com/)
 
 4. Run the development server:
 
