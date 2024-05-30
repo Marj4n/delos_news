@@ -1,7 +1,6 @@
 import { AccountType } from "@/types/account";
 import { ApiResponseType } from "@/types/api";
 import bcrypt from "bcryptjs";
-import moment from "moment";
 
 // Storage Utility Functions
 export const getStorage = <T>(key: string): T | null => {
@@ -129,6 +128,7 @@ export const buyArticle = (article: ApiResponseType, price: number) => {
     ...session,
     balance: session.balance - price,
     totalSpent: session.totalSpent + price,
+    freeArticles: price === 0 ? session.freeArticles - 1 : session.freeArticles,
     owned: [...session.owned, article],
   };
 
@@ -149,9 +149,11 @@ export const buyArticle = (article: ApiResponseType, price: number) => {
 
 // Article Price Calculation
 export const getPrice = (article: ApiResponseType) => {
-  const now = moment().format("YYYY-MM-DD");
-  const diff = moment(now).diff(moment(article.published_date), "days");
-  return diff <= 1 ? 50000 : diff <= 7 ? 20000 : 0;
+  const now = new Date().toISOString().split("T")[0];
+  const diff =
+    new Date(now).getTime() - new Date(article.published_date).getTime();
+  const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return diffDays <= 1 ? 50000 : diffDays <= 7 ? 20000 : 0;
 };
 
 // Image URL Extraction
@@ -180,7 +182,7 @@ export const getOwnedArticles = (account: AccountType): ApiResponseType[] => {
 
 // Lucky Draw Setup
 export const setLuckDraw = (account: AccountType) => {
-  if (account.totalSpent <= 50000) return { account };
+  if (account.totalSpent < 50000) return { account };
 
   account.totalSpent -= 50000;
   account.luckyDraw = 3;
@@ -207,6 +209,8 @@ export const getRandomReward = (hasJackpot: boolean) => {
     { display: "$10.000", value: 10000 },
     { display: "$5.000", value: 5000 },
     { display: "Extra Ticket", value: 1 },
+    { display: "1 Free Article", value: "freeArticle1" },
+    { display: "2 Free Articles", value: "freeArticle2" },
   ];
 
   if (!hasJackpot) {
@@ -226,20 +230,27 @@ export const redeemTicket = (account: AccountType) => {
   const reward = getRandomReward(account.gotJackpot);
   let updatedBalance = account.balance;
   let additionalTickets = 0;
+  let additionalFreeArticles = 0;
   let gotJackpot = account.gotJackpot;
 
   switch (reward.display) {
     case "$50.000":
-      updatedBalance += reward.value;
+      updatedBalance += Number(reward.value);
       gotJackpot = true;
       break;
     case "$20.000":
     case "$10.000":
     case "$5.000":
-      updatedBalance += reward.value;
+      updatedBalance += Number(reward.value);
       break;
     case "Extra Ticket":
-      additionalTickets += reward.value;
+      additionalTickets += Number(reward.value);
+      break;
+    case "1 Free Article":
+      additionalFreeArticles += 1;
+      break;
+    case "2 Free Articles":
+      additionalFreeArticles += 2;
       break;
     case "Try Again":
     default:
@@ -250,6 +261,7 @@ export const redeemTicket = (account: AccountType) => {
     ...account,
     balance: updatedBalance,
     luckyDraw: account.luckyDraw - 1 + additionalTickets,
+    freeArticles: account.freeArticles + additionalFreeArticles,
     gotJackpot: gotJackpot,
   };
 

@@ -1,30 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import BlogPost from "@/components/blog.post";
 import {
   Center,
-  SimpleGrid,
-  Text,
   Spinner,
+  Flex,
   Alert,
   AlertIcon,
-  Flex,
-  Input,
-  Select,
   Heading,
 } from "@chakra-ui/react";
-import { redirect } from "next/navigation";
-import { ApiResponseType } from "@/types/api";
 import { useArticle } from "@/lib/api";
-import PostPagination from "@/components/post.pagination";
 import { useUser } from "@/context/userContext";
 import { OptionType } from "@/types/option";
+import { redirect } from "next/navigation";
+import { ApiResponseType } from "@/types/api";
+import ArticleSearch from "@/components/article.search";
+import ArticleList from "@/components/article.list";
 
-export default function Home() {
+const HomePage: React.FC = () => {
   const [articles, setArticles] = useState<ApiResponseType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<OptionType>("emailed");
@@ -90,38 +86,24 @@ export default function Home() {
 
   return (
     <Center minH="80vh" flexDirection="column" gap={2} p={4}>
-      <Heading fontSize="2xl" mb={4} textAlign="center">
+      <Heading fontSize="2xl" my={4} textAlign="center">
         A website for ordering articles and news
       </Heading>
-      <Flex mb={4} gap={4} w="100%" maxW="800px" flexDirection="row">
-        <Input
-          placeholder="Search for articles..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          flex="1"
-        />
-        <Select
-          value={filterType}
-          onChange={handleFilterChange}
-          w="auto"
-          mt="0"
-        >
-          <option value="emailed">Emailed</option>
-          <option value="shared">Shared</option>
-          <option value="viewed">Viewed</option>
-        </Select>
-      </Flex>
-      <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6}>
-        {currentItems.map((article) => (
-          <BlogPost data={article} key={article.id} />
-        ))}
-      </SimpleGrid>
-      <PostPagination
+      <ArticleSearch
+        searchTerm={searchTerm}
+        filterType={filterType}
+        handleSearchChange={handleSearchChange}
+        handleFilterChange={handleFilterChange}
+      />
+      <ArticleList
+        articles={currentItems}
+        currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         totalItems={filteredArticles.length}
         paginate={paginate}
-        currentPage={currentPage}
       />
     </Center>
   );
-}
+};
+
+export default HomePage;

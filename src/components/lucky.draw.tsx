@@ -13,7 +13,7 @@ import { useUser } from "@/context/userContext";
 
 const emojis = ["🎉", "🎊", "🎁", "🎲", "🎯", "🎈"];
 
-export default function LuckyDraw() {
+export default function () {
   const [reward, setReward] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user, setUser } = useUser();

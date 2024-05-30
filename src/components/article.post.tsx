@@ -12,6 +12,7 @@ import { ApiResponseType } from "@/types/api";
 import { useArticle } from "@/context/articleContext";
 import { getImageUrl, getPrice, truncateText } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/userContext";
 
 export default function ({
   data,
@@ -21,7 +22,10 @@ export default function ({
   owned?: boolean;
 }) {
   const router = useRouter();
-  const prices = getPrice(data);
+  let prices = getPrice(data);
+  const free = useUser().user?.freeArticles ?? [];
+  if (free) prices = 0;
+
   const { setArticle } = useArticle();
   const imageUrl = getImageUrl(data);
   const truncatedAbstract = truncateText(data.abstract, 150);
@@ -39,7 +43,7 @@ export default function ({
     <Center py={6}>
       <Box
         onClick={owned ? undefined : handleClick}
-        cursor="pointer"
+        cursor={owned ? "default" : "pointer"}
         maxW={{ base: "full", md: "445px" }}
         w={"full"}
         bg={useColorModeValue("white", "gray.900")}
@@ -95,7 +99,9 @@ export default function ({
             {!owned && (
               <Text fontWeight={600}>
                 {data.published_date} ·{" "}
-                {prices > 0 ? `$${prices.toLocaleString("id-ID")}` : "Free"}
+                {free || prices === 0
+                  ? "Free"
+                  : `$${prices.toLocaleString("id-ID")}`}
               </Text>
             )}
             {owned && (
