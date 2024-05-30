@@ -63,7 +63,7 @@ function RegisterForm() {
       <Stack align={"center"}>
         <Heading
           fontSize={{
-            base: "3xl",
+            base: "2xl",
             md: "3xl",
             lg: "4xl",
           }}
