@@ -15,6 +15,7 @@ import {
   useColorMode,
   Center,
   Heading,
+  Text,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import Image from "next/image";
@@ -89,9 +90,14 @@ export default function () {
                   </Center>
                   <br />
                   <Flex flexDir="column" align="center">
-                    <p>{user.username}</p>
+                    <Text>{user.username}</Text>
                     <Heading size="sm">{user.email}</Heading>
-                    <p>Balance: ${user.balance.toLocaleString("id-ID")}</p>
+                    <Text>
+                      Balance: ${user.balance.toLocaleString("id-ID")}
+                    </Text>
+                    {user.freeArticles > 0 && (
+                      <Text color="blue.300">Free Articles: {user.freeArticles}</Text>
+                    )}
                   </Flex>
                   <br />
                   <MenuDivider />

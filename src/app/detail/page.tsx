@@ -21,7 +21,7 @@ import { redirect } from "next/navigation";
 
 export default function Detail() {
   const { article } = useArticle();
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buying, setBuying] = useState(false);
@@ -48,7 +48,9 @@ export default function Detail() {
     return redirect("/");
   }
 
-  const prices = getPrice(article);
+  let prices = getPrice(article);
+  const free = user?.freeArticles;
+  if (free) prices = 0;
 
   const imageUrl = getImageUrl(article);
 

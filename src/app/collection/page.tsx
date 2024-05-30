@@ -1,6 +1,6 @@
 "use client";
 
-import BlogPost from "@/components/blog.post";
+import ArticlePost from "@/components/article.post";
 import { useUser } from "@/context/userContext";
 import { getOwnedArticles } from "@/lib/utils";
 import { ApiResponseType } from "@/types/api";
@@ -41,7 +41,7 @@ export default function Collection() {
           </Center>
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6}>
             {ownedArticles.map((article) => (
-              <BlogPost key={article.id} data={article} owned={true} />
+              <ArticlePost key={article.id} data={article} owned={true} />
             ))}
           </SimpleGrid>
         </VStack>
