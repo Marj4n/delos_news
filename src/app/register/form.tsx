@@ -61,7 +61,15 @@ function RegisterForm() {
   return (
     <Stack spacing={8} w={"100%"} maxW={"lg"} py={12} px={6}>
       <Stack align={"center"}>
-        <Heading fontSize={"4xl"}>Register</Heading>
+        <Heading
+          fontSize={{
+            base: "3xl",
+            md: "3xl",
+            lg: "4xl",
+          }}
+        >
+          Register
+        </Heading>
         <Text fontSize={"lg"} color={"gray.600"}>
           Already have an account?{" "}
           <LinkBox as="span" color={"blue.400"}>

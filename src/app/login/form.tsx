@@ -67,7 +67,15 @@ function LoginForm() {
   return (
     <Stack spacing={8} w="100%" maxW="lg" py={12} px={6}>
       <Stack align="center">
-        <Heading fontSize="4xl">Login to your account</Heading>
+        <Heading
+          fontSize={{
+            base: "3xl",
+            md: "3xl",
+            lg: "4xl",
+          }}
+        >
+          Login to your account
+        </Heading>
         <Text fontSize="lg" color="gray.600">
           Don&apos;t have an account?{" "}
           <LinkBox as="span" color="blue.400">
