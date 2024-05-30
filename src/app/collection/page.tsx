@@ -4,7 +4,7 @@ import BlogPost from "@/components/blog.post";
 import { useUser } from "@/context/userContext";
 import { getOwnedArticles } from "@/lib/utils";
 import { ApiResponseType } from "@/types/api";
-import { Box, Center, SimpleGrid, VStack } from "@chakra-ui/react";
+import { Box, Center, Heading, SimpleGrid, VStack } from "@chakra-ui/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -35,9 +35,9 @@ export default function Collection() {
       >
         <VStack spacing={6}>
           <Center>
-            <Box>
-              <h1>Owned Articles</h1>
-            </Box>
+            <Heading fontSize="2xl" mb={4}>
+              Owned Articles
+            </Heading>
           </Center>
           <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 3 }} spacing={6}>
             {ownedArticles.map((article) => (

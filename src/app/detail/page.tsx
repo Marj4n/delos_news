@@ -8,14 +8,12 @@ import {
   Text,
   Stack,
   Spinner,
-  Alert,
-  AlertIcon,
   useColorModeValue,
   Flex,
   Button,
   useToast,
 } from "@chakra-ui/react";
-import { buyArticle, getImageUrl, getPrice } from "@/lib/utils";
+import { buyArticle, getImageUrl, getPrice, setLuckDraw } from "@/lib/utils";
 import Image from "next/image";
 import { useArticle } from "@/context/articleContext";
 import { useUser } from "@/context/userContext";
@@ -69,17 +67,17 @@ export default function Detail() {
             : result.error,
         status: "error",
         position: "bottom-right",
-        duration: 5000,
+        duration: 2000,
         isClosable: true,
       });
     } else {
-      setUser(result.account!!);
+      setUser(setLuckDraw(result.account!!)?.account!!);
       toast({
         title: "Purchase successful.",
         description: "You have successfully purchased the article.",
         status: "success",
         position: "bottom-right",
-        duration: 5000,
+        duration: 2000,
         isClosable: true,
       });
     }

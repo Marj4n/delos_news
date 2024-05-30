@@ -3,49 +3,26 @@ import { ApiResponseType } from "@/types/api";
 import bcrypt from "bcryptjs";
 import moment from "moment";
 
-/**
- * Get data from local storage by key
- * @param key - The local storage key
- * @returns The parsed data or null if not found
- */
+// Storage Utility Functions
 export const getStorage = <T>(key: string): T | null => {
   const storedItem = localStorage.getItem(key);
   return storedItem ? JSON.parse(storedItem) : null;
 };
 
-/**
- * Set data to local storage by key
- * @param key - The local storage key
- * @param value - The data to store
- */
 export const setStorage = <T>(key: string, value: T) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-/**
- * Remove data from local storage by key
- * @param key - The local storage key
- */
 export const removeStorage = (key: string) => {
   localStorage.removeItem(key);
 };
 
-/**
- * Hash a password using bcrypt
- * @param password - The plain text password
- * @returns The hashed password
- */
+// Password Utility Functions
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(password, salt);
 };
 
-/**
- * Compare a plain text password with a hashed password
- * @param password - The plain text password
- * @param hashedPassword - The hashed password
- * @returns True if the passwords match, false otherwise
- */
 export const comparePassword = async (
   password: string,
   hashedPassword: string
@@ -53,52 +30,38 @@ export const comparePassword = async (
   return bcrypt.compare(password, hashedPassword);
 };
 
-/**
- * Save an account to local storage
- * @param account - The account to save
- */
+// Account Utility Functions
 export const saveAccount = async (account: AccountType) => {
   account.password = await hashPassword(account.password);
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
-  const updatedAccounts = [...existingAccounts, account];
-  setStorage("accounts", updatedAccounts);
+  setStorage("accounts", [...existingAccounts, account]);
 };
 
-/**
- * Check if an account with the same username or email already exists
- * @param account - The account to check
- * @returns An error object if a duplicate is found, null otherwise
- */
 export const registerAccount = async (account: AccountType) => {
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
-  const username = existingAccounts.find(
+  const usernameExists = existingAccounts.some(
     (acc) => acc.username === account.username
   );
-  const email = existingAccounts.find((acc) => acc.email === account.email);
+  const emailExists = existingAccounts.some(
+    (acc) => acc.email === account.email
+  );
 
-  if (username) {
+  if (usernameExists) {
     return {
       error: "Username already exists. Please choose a different username.",
     };
   }
 
-  if (email) {
+  if (emailExists) {
     return {
       error: "Email address already exists. Please use a different email.",
     };
   }
 
-  saveAccount(account);
-
+  await saveAccount(account);
   return { account };
 };
 
-/**
- * Login an account with the provided credentials
- * @param email - The email of the account
- * @param password - The plain text password
- * @returns An object containing the account if successful, or an error message
- */
 export const loginAccount = async (email: string, password: string) => {
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
   const account = existingAccounts.find((acc) => acc.email === email);
@@ -118,15 +81,8 @@ export const loginAccount = async (email: string, password: string) => {
   return { account: initializedAccount };
 };
 
-/**
- * Set a session in local storage and update the accounts data
- * @param account - The account to store in session
- */
 export const setSession = (account: AccountType) => {
-  // Update the session
   setStorage("user", account);
-
-  // Update the accounts data in local storage
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
   const updatedAccounts = existingAccounts.map((acc) =>
     acc.email === account.email ? account : acc
@@ -134,92 +90,50 @@ export const setSession = (account: AccountType) => {
   setStorage("accounts", updatedAccounts);
 };
 
-/**
- * Get the session from local storage
- * @returns The session object or null if not found
- */
-export const getSession = (): AccountType | null => {
-  return getStorage<AccountType>("user");
-};
+export const getSession = (): AccountType | null =>
+  getStorage<AccountType>("user");
 
-/**
- * Remove the session from local storage
- */
-export const removeSession = () => {
-  removeStorage("user");
-};
+export const removeSession = () => removeStorage("user");
 
-/**
- * Set the selected article in local storage
- * @param article - The article to store
- */
-export const setSelectedArticle = (article: ApiResponseType) => {
+// Article Utility Functions
+export const setSelectedArticle = (article: ApiResponseType) =>
   setStorage("selectedArticle", article);
-};
 
-/**
- * Get the selected article from local storage
- * @returns The selected article object or null if not found
- */
-export const getSelectedArticle = (): ApiResponseType | null => {
-  return getStorage<ApiResponseType>("selectedArticle");
-};
+export const getSelectedArticle = (): ApiResponseType | null =>
+  getStorage<ApiResponseType>("selectedArticle");
 
-/**
- * Remove the selected article from local storage
- */
-export const removeSelectedArticle = () => {
-  removeStorage("selectedArticle");
-};
+export const removeSelectedArticle = () => removeStorage("selectedArticle");
 
-/**
- * Initialize account with default values if they don't exist
- * @param account - The account to initialize
- * @returns The initialized account
- */
-const initializeAccount = (account: AccountType): AccountType => {
-  return {
-    ...account,
-    balance: account.balance ?? 100000,
-    freeArticles: account.freeArticles ?? 0,
-    gotJackpot: account.gotJackpot ?? false,
-    luckyDraw: account.luckyDraw ?? 0,
-    owned: account.owned ?? [],
-    totalSpent: account.totalSpent ?? 0,
-  };
-};
+// Account Initialization
+const initializeAccount = (account: AccountType): AccountType => ({
+  ...account,
+  balance: account.balance ?? 100000,
+  freeArticles: account.freeArticles ?? 0,
+  gotJackpot: account.gotJackpot ?? false,
+  luckyDraw: account.luckyDraw ?? 0,
+  owned: account.owned ?? [],
+  totalSpent: account.totalSpent ?? 0,
+});
 
-/**
- * Buy an article and update user account
- * @param article - The article to buy
- * @param price - The price of the article
- * @returns An object containing the updated account if successful, or an error message
- */
-
+// Buying Articles
 export const buyArticle = (article: ApiResponseType, price: number) => {
   const session = getSession();
-  if (!session) {
-    return { error: "User not logged in." };
-  }
+  if (!session) return { error: "User not logged in." };
 
-  if (session.balance < price) {
-    return { error: "Insufficient balance." };
-  }
+  if (session.balance < price) return { error: "Insufficient balance." };
 
-  if (session.owned.find((art) => art.id === article.id)) {
+  if (session.owned.some((art) => art.id === article.id))
     return { error: "Article already owned." };
-  }
 
   const updatedAccount = {
     ...session,
     balance: session.balance - price,
+    totalSpent: session.totalSpent + price,
     owned: [...session.owned, article],
   };
 
-  // Update session
   setSession(updatedAccount);
 
-  // Update accounts storage
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
   const accountIndex = existingAccounts.findIndex(
     (acc) => acc.email === session.email
@@ -233,24 +147,14 @@ export const buyArticle = (article: ApiResponseType, price: number) => {
   return { account: updatedAccount };
 };
 
-/**
- * Get the price of an article based on its published date
- * @param article - The article to get the price for
- * @returns The price of the article
- */
+// Article Price Calculation
 export const getPrice = (article: ApiResponseType) => {
   const now = moment().format("YYYY-MM-DD");
   const diff = moment(now).diff(moment(article.published_date), "days");
-  const prices = diff <= 1 ? 50000 : diff <= 7 ? 20000 : 0;
-  return prices;
+  return diff <= 1 ? 50000 : diff <= 7 ? 20000 : 0;
 };
 
-/**
- * Get the image URL from the API response
- * @param data - The API response data
- * @returns The image URL
- */
-
+// Image URL Extraction
 export const getImageUrl = (data: ApiResponseType) => {
   return (
     data.media?.[0]?.["media-metadata"]?.[2]?.url ||
@@ -260,34 +164,106 @@ export const getImageUrl = (data: ApiResponseType) => {
   );
 };
 
-/**
- * Truncate text to a specified length
- * @param text - The text to truncate
- * @param maxLength - The maximum length of the text
- * @returns The truncated text
- */
-
+// Text Truncation
 export const truncateText = (text: string, maxLength: number): string => {
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + "...";
-  }
-  return text;
+  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
 
-/**
- * Get the articles owned by a user
- * @param userEmail - The email of the user
- * @returns An array of articles owned by the user
- */
+// Owned Articles Retrieval
 export const getOwnedArticles = (account: AccountType): ApiResponseType[] => {
   const existingAccounts = getStorage<AccountType[]>("accounts") || [];
   const userAccount = existingAccounts.find(
     (acc) => acc.email === account.email
   );
+  return userAccount?.owned || [];
+};
 
-  if (!userAccount) {
-    return [];
+// Lucky Draw Setup
+export const setLuckDraw = (account: AccountType) => {
+  if (account.totalSpent <= 50000) return { account };
+
+  account.totalSpent -= 50000;
+  account.luckyDraw = 3;
+
+  const existingAccounts = getStorage<AccountType[]>("accounts") || [];
+  const accountIndex = existingAccounts.findIndex(
+    (acc) => acc.email === account.email
+  );
+
+  if (accountIndex !== -1) {
+    existingAccounts[accountIndex] = account;
+    setStorage("accounts", existingAccounts);
+    setSession(account);
   }
 
-  return userAccount.owned;
+  return { account };
+};
+
+// Random Reward for Lucky Draw
+export const getRandomReward = (hasJackpot: boolean) => {
+  const rewards = [
+    { display: "$20.000", value: 20000 },
+    { display: "Try Again", value: 0 },
+    { display: "$10.000", value: 10000 },
+    { display: "$5.000", value: 5000 },
+    { display: "Extra Ticket", value: 1 },
+  ];
+
+  if (!hasJackpot) {
+    rewards.push({ display: "$50.000", value: 50000 });
+  }
+
+  const randomIndex = Math.floor(Math.random() * rewards.length);
+  return rewards[randomIndex];
+};
+
+// Ticket Redemption for Lucky Draw
+export const redeemTicket = (account: AccountType) => {
+  if (account.luckyDraw <= 0) {
+    return { error: "No tickets available for redemption." };
+  }
+
+  const reward = getRandomReward(account.gotJackpot);
+  let updatedBalance = account.balance;
+  let additionalTickets = 0;
+  let gotJackpot = account.gotJackpot;
+
+  switch (reward.display) {
+    case "$50.000":
+      updatedBalance += reward.value;
+      gotJackpot = true;
+      break;
+    case "$20.000":
+    case "$10.000":
+    case "$5.000":
+      updatedBalance += reward.value;
+      break;
+    case "Extra Ticket":
+      additionalTickets += reward.value;
+      break;
+    case "Try Again":
+    default:
+      break;
+  }
+
+  const updatedAccount = {
+    ...account,
+    balance: updatedBalance,
+    luckyDraw: account.luckyDraw - 1 + additionalTickets,
+    gotJackpot: gotJackpot,
+  };
+
+  setSession(updatedAccount);
+
+  const existingAccounts = getStorage<AccountType[]>("accounts") || [];
+  const accountIndex = existingAccounts.findIndex(
+    (acc) => acc.email === account.email
+  );
+
+  if (accountIndex !== -1) {
+    existingAccounts[accountIndex] = updatedAccount;
+    setStorage("accounts", existingAccounts);
+  }
+
+  return { account: updatedAccount, reward: reward.display };
 };

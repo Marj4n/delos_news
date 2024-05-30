@@ -98,6 +98,15 @@ export default function () {
                   <MenuItem as={Link} href="/collection">
                     Collection
                   </MenuItem>
+                  {user.luckyDraw > 0 && (
+                    <MenuItem
+                      as={Link}
+                      href="/rewards"
+                      _hover={{ color: "blue.400" }}
+                    >
+                      Rewards
+                    </MenuItem>
+                  )}
                   <MenuItem
                     onClick={() => {
                       removeSession();
